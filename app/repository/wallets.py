@@ -1,21 +1,29 @@
-BALANCE: dict[str, float] = {}
+from decimal import Decimal
+from typing import List
+from sqlalchemy.orm import Session
+from app.models import Wallet
 
-def check_wallet_exist(wallet_name: str) -> bool:
-    return wallet_name in BALANCE
+def check_wallet_exist(db: Session, wallet_name: str) -> bool:
+    return db.query(Wallet).filter(Wallet.name == wallet_name).first() is not None
 
-def income_balance(name_wallet: str, amount: float) -> float:
-    BALANCE[name_wallet] += amount
-    return BALANCE[name_wallet]
+def income_balance(db: Session, name_wallet: str, amount: Decimal) -> Wallet:
+    wallet = db.query(Wallet).filter(Wallet.name == name_wallet).first()
+    wallet.balance += amount
+    return wallet
 
-def expense_balance(name_wallet: str, amount: float) -> float:
-    BALANCE[name_wallet] -= amount
-    return BALANCE[name_wallet]
 
-def get_balance_repo(name_wallet: str) -> float:
-    return BALANCE[name_wallet]
+def expense_balance(db: Session, name_wallet: str, amount: Decimal) -> Wallet:
+    wallet = db.query(Wallet).filter(Wallet.name == name_wallet).first()
+    wallet.balance -= amount
+    return wallet
 
-def get_total_balance():
-    return sum(BALANCE.values())
+def get_balance_repo(db: Session, name_wallet: str) -> Wallet:
+    return db.query(Wallet).filter(Wallet.name == name_wallet).first()
 
-def init_wallet(name_wallet: str, init_balance: float) -> None:
-    BALANCE[name_wallet] = init_balance
+def get_total_balance(db: Session) -> List[Wallet]:
+    return db.query(Wallet).all()
+
+def init_wallet(db: Session, name_wallet: str, init_balance: Decimal) -> Wallet:
+    wallet = Wallet(name=name_wallet, balance=init_balance)
+    db.add(wallet)
+    return wallet

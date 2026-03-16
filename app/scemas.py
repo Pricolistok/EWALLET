@@ -1,9 +1,11 @@
+from decimal import Decimal
+
 from pydantic import Field, field_validator, BaseModel
 
 
 class OperationRequest(BaseModel):
     wallet_name: str = Field(..., max_length=127)
-    amount: float = Field(..., ge=0)
+    amount: Decimal = Field(..., ge=0)
     description: str | None = Field(None, max_length=255)
 
     @field_validator("wallet_name")
@@ -16,7 +18,7 @@ class OperationRequest(BaseModel):
 
 class OperationCreateWallet(BaseModel):
     wallet_name: str = Field(..., max_length=127)
-    init_balance: float = Field(..., ge=0)
+    init_balance: Decimal = Field(..., ge=0)
 
 
     @field_validator("wallet_name")
